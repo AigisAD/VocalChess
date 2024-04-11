@@ -11,7 +11,7 @@ Fully working chess program with intent to allow user input via speech. A passio
   * Ability to choose promotion piece
   * Move history in Algebraic Chess Notation
   * Ability to download functioning PGN at end of game
-  * 
+    
 **All Chess Rules** (for fellow chess nerds):
   * Castling
   * En Passant
