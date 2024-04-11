@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Board</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="board-container">
+        <div class="board" id="board"style="float: left"></div>
+         <div id="sideLog" class="side-log" style="float: left"></div>
+    </div>
+    
+    <canvas id="canvas"></canvas>
+    <div id="popupContainer" class="popup-container">
+        <div class="popup-content">
+          <h2 id="popupTitle">Checkmate!</h2>
+          <p>The game is over. Refresh the page to start a new game.</p>
+          <button id="refreshButton">Refresh</button>
+          <button id="closeButton">Close</button>
+        </div>
+      </div>
+    <div id="promotionOverlayW" class="overlay">
+        <div class="overlay-content white">     
+            <div class="promotion-optionsW">
+                <!-- White piece options -->
+                <img src="pieces/wQueen.png" class="promotion-option" data-piece="wQ" alt="Queen">
+                <img src="pieces/wRook.png" class="promotion-option" data-piece="wR" alt="Rook">
+                <img src="pieces/wBishop.png" class="promotion-option" data-piece="wB" alt="Bishop">
+                <img src="pieces/wKnight.png" class="promotion-option" data-piece="wN" alt="Knight">
+                
+            </div>
+            <button id="closeOverlayButton">X</button>
+        </div> 
+    </div>
+    <div id="promotionOverlayB" class="overlay">
+        <div class="overlay-content black">     
+            <div class="promotion-optionsB">
+                <!-- Black piece options -->
+                <img src="pieces/bQueen.png" class="promotion-option" data-piece="bQ" alt="Queen">
+                <img src="pieces/bRook.png" class="promotion-option" data-piece="bR" alt="Rook">
+                <img src="pieces/bBishop.png" class="promotion-option" data-piece="bB" alt="Bishop">
+                <img src="pieces/bKnight.png" class="promotion-option" data-piece="bN" alt="Knight">
+                
+            </div>
+            <button id="closeOverlayButton">X</button>
+        </div> 
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
