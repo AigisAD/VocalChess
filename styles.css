@@ -135,6 +135,7 @@
    display:flex;
    align-items: flex-start;
    padding-left: 30px; 
+   padding-bottom: 40px;
 
    
 }
@@ -198,4 +199,25 @@
   #closeButton:hover {
     background-color: #717070;
   }
+  .textfield {
+    width: 200px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
   
+  .textfield:focus {
+    border-color: #007bff; /* Change border color on focus */
+  }
+  
+  .container {
+    margin-left: 30px;
+    margin-bottom: 10px;
+
+  }
+  .invalid-input {
+    border: 1px solid red !important;
+}

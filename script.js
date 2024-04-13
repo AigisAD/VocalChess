@@ -1,6 +1,9 @@
 import pgnClass from './pgn.js';
 const board = document.getElementById('board');
 const canvas = document.getElementById('canvas');
+const moveInput = document.getElementById('moveInput');
+const resignButton = document.getElementById('resignButton');
+const drawButton = document.getElementById('drawButton');
 canvas.width = window.innerWidth; 
 canvas.height = window.innerHeight;
 board.width = canvas.width * .70; //Adjust to css
@@ -16,15 +19,152 @@ let promoPiece=null;
 let enPassantable=null;
 let moveNote="";
 let moveNumber=1;
+let gameOver=false;
 
+//Listeners for the textfield
+moveInput.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') { 
+      handleTextInput();
+    }
+});
+moveInput.addEventListener('keydown', function() {
+    // Remove the 'invalid-input' class when the user starts typing
+    if (event.key != 'Enter') { 
+        moveInput.classList.remove('invalid-input');
+      }
+});
+
+//Function that allows text input in Algebraic Notation along with normal input
+function handleTextInput(){
+    let result=moveParse(moveInput.value);
+    let prev=highlightedSquare;
+    console.log(result);
+    if(result==null){
+        moveInput.classList.add('invalid-input');
+        console.log("bad");
+        return;
+    }
+    let maybe=null;
+    const color=turn?"w":"b";
+    for(let i=0; i<=7;i++){
+        for(let j=0;j<=7;j++){
+            if(game.squareBoard[i][j].dataset.piece[1]==result.piece&&color==game.squareBoard[i][j].dataset.piece[0]){
+                highlightedSquare=game.squareBoard[i][j];
+                possibleMoves(highlightedSquare);
+                if (possiList.has(result.destination[0]+""+result.destination[1])){
+                    const potential=highlightedSquare.dataset;
+                    if(result.disamR+result.disamF==""||result.disamR+result.disamF==potential.chess+potential.chessC){
+                        maybe=highlightedSquare;
+                        break;
+                    }else if(result.disamF==potential.chess||result.disamR==potential.chessC){
+                        maybe=highlightedSquare;
+                    }
+                }
+            }
+        }
+    }
+    const clickEvent = new MouseEvent('mousedown', {button: 0, });   
+    console.log(maybe);
+    highlightedSquare=prev;
+    if(maybe!=null){
+        if(highlightedSquare!=maybe){
+            maybe.dispatchEvent(clickEvent);
+        }
+        game.squareBoard[result.destination[0]][result.destination[1]].dispatchEvent(clickEvent);
+        moveInput.value = '';
+        const color=!turn?"w":"b";
+        const overlay=!turn?document.getElementById("promotionOverlayW"):document.getElementById("promotionOverlayB");
+        
+        if(overlay.style.display=="block" && result.promotion!=""){
+            const piece=color+result.promotion[1];
+            const selector=`#promotionOverlay${color.toUpperCase()} .promotion-option[data-piece="${piece}"]`;
+            const select=document.querySelector(selector);
+            select.click();
+        }
+
+    }else{
+        moveInput.classList.add('invalid-input');
+        console.log("cant find");
+    }
+    
+}
+//Function to parse text input
+function moveParse(input){
+    if (input === 'O-O') {
+        const way=turn?[7,6]:[0,6];
+        return {
+            piece: 'K',
+            destination:way,
+            disamF:'',
+            disamR: '',
+            additional: '',
+            promotion:  ''
+
+        };
+    } else if (input === 'O-O-O') {
+        const way=turn?[7,2]:[0,2];
+        return {
+            piece: 'K',
+            destination:way,
+            disamF:'',
+            disamR: '',
+            additional: '',
+            promotion:  ''
+
+        };
+    }
+    const regex = /^([KQRNBP]?)([a-h]?)([1-8]?)(x?)([a-h])([1-8])((=[QRNB])?)([+#]?)/;
+
+    if (!input.match(regex)) {
+        return null; //bad input
+    }
+    const [, piece, disamF, disamR, capture, file, rank,  promotion ,additional] = input.match(regex);
+    const col = file.charCodeAt(0)-97;
+    const row = 8 - Number(rank); 
+    return{
+        piece: piece || 'P',
+        destination: [row, col],
+        capture: capture === 'x',
+        additional: additional || '',
+        promotion: promotion || '',
+        disamF: disamF ||'',
+        disamR: disamR ||''
+    }
+
+
+}
+//Event listener to resign
+resignButton.addEventListener('click', function() {
+    pgnBuilder.updateRes(Number(!turn));
+    showPopup(2);
+    pgnBuilder.display();
+    resignButton.style.display="none";
+    drawButton.style.display="none";
+
+});
+//Event listener to draw
+drawButton.addEventListener('click', function() {
+    pgnBuilder.updateRes(-1);
+    showPopup(3);
+    pgnBuilder.display();
+    resignButton.style.display="none";
+    drawButton.style.display="none";
+
+});
 //Pop-up for ending
 function showPopup(type) {
     const popupContainer = document.getElementById('popupContainer');
     let popupTitle = document.getElementById('popupTitle');
     if(type==1){//Stalemate
         popupTitle.textContent ="Stalemate";
+    }else if(type==2){//resign
+        popupTitle.textContent ="Resignation";
+    }else if(type==3){//draw
+        popupTitle.textContent ="Draw";
     }
     popupContainer.style.display = 'flex';
+    gameOver=true;
+    endSidelog();
 }
 
 // Function to hide the pop-up
@@ -143,6 +283,128 @@ function updateSideLog(moveNotation) {
     pgnBuilder.updateGame(moveNotation+" ");
     sideLog.scrollTop = sideLog.scrollHeight;
 }
+function endSidelog(){
+    const sideLog = document.getElementById('sideLog');
+    const newMove = document.createElement('div');
+    newMove.textContent = pgnBuilder.result;
+    let lastRow = document.createElement('div');
+    lastRow.classList.add('row');
+    if(moveNumber%2){ //Color shift
+        lastRow.classList.add('shade');
+    }
+    lastRow.style.gridTemplateColumns='2fr 1fr 2fr';
+    sideLog.appendChild(lastRow);
+    const blank= document.createElement('div');
+    lastRow.appendChild(blank);
+    lastRow.appendChild(newMove);
+    sideLog.scrollTop = sideLog.scrollHeight;
+
+}
+function squareMouseDownHandler(event)  {
+    let square=event.currentTarget;
+    if (event.button===0){//Left click
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        arrowSet.clear();
+        redHighlightedSquares.forEach(function(element) {
+            element.classList.remove('highlighted-red');
+        });
+        redHighlightedSquares.clear();
+        if(enPassantable!=null&&enPassantable[1]==0){
+            enPassantable=null;
+        }
+        promoPiece=null;
+        if (square.classList.contains('highlighted-yellow')) { //Highlight cancel
+            square.classList.remove('highlighted-yellow');
+            highlightedSquare = null;
+            possiList.clear();
+        } else {
+            if(possiList.has(square.dataset.row+square.dataset.col)){//Move
+                let ret=movePiece(highlightedSquare,square);
+                if (ret!=4){
+                    //console.log(moveNote);
+                    updateSideLog(moveNote);
+                    if(pgnBuilder.result!=""){
+                        pgnBuilder.display();
+                    }   
+                }
+                highlightedSquare.classList.remove('highlighted-yellow');
+                square.classList.add('highlighted-yellow');
+                highlightedSquare=square;
+                possiList.clear();
+                turn=!turn;
+                if(enPassantable!=null){
+                    enPassantable[1]--;
+                }
+                
+
+            }else{//Different square highlight
+                if (highlightedSquare !== null) {
+                    highlightedSquare.classList.remove('highlighted-yellow');
+                }
+                square.classList.add('highlighted-yellow');
+                highlightedSquare = square;
+                highlightedPrint();
+                let color=turn?"w":"b";
+                if(highlightedSquare.dataset.piece[0]==color&&!gameOver){
+                    pieceOnSquare(highlightedSquare);
+                    displayPossi();
+                    
+                }else{
+                    possiList.clear(); 
+                }
+                
+            }
+            
+        }
+    }else{//Right click (down)
+        if (highlightedSquare !== null) {
+            highlightedSquare.classList.remove('highlighted-yellow');
+        }
+        if(possiList.size!==0){
+            possiList.clear();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        highlightedSquare = square;
+        //highlightedPrint();
+
+    }
+}
+function squareMouseUpHandler(event) {
+    let square=event.currentTarget;
+    if(event.button===0||highlightedSquare==null){
+        return;
+    }
+    if (highlightedSquare==square){
+        //Cancel highlight (red)
+        if (square.classList.contains('highlighted-red')) {
+            square.classList.remove('highlighted-red');
+            redHighlightedSquares.delete(square);
+        } else {
+            square.classList.add('highlighted-red');
+            redHighlightedSquares.add(square);
+        }
+    }else {
+        //Draw arrow
+        let startPos=getSquarePosition(highlightedSquare);
+        const endPos = getSquarePosition(square);
+        if(arrowSet.has(square2Chess(highlightedSquare)+square2Chess(square))){
+            arrowSet.delete(square2Chess(highlightedSquare)+square2Chess(square));
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            arrowSet.forEach(arrow => {
+                drawArrow(getSquarePosition(arrow.highlightedSquare), getSquarePosition(arrow.square));
+            });
+            return;
+        }
+        arrowSet.set(square2Chess(highlightedSquare)+square2Chess(square),{highlightedSquare,square});
+        drawArrow(startPos, endPos);
+        highlightedSquare=square;
+        //highlightedPrint();
+        highlightedSquare=null;
+        startPos=null;
+    }
+
+}
+
 // Function to create squares
 function createSquare(row, col) {
     const square = document.createElement('div');
@@ -154,111 +416,12 @@ function createSquare(row, col) {
     }
     square.dataset.row = row;
     square.dataset.col = col;
-    square.dataset.chess=square2Chess(square)[0];
-    square.dataset.chessC=square2Chess(square)[1];
+    square.dataset.chess=square2Chess(square)[0];//file
+    square.dataset.chessC=square2Chess(square)[1];//rank
     square.dataset.piece = "x";
 
-    square.addEventListener('mousedown', function(event) {
-        if (event.button===0){//Left click
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            arrowSet.clear();
-            redHighlightedSquares.forEach(function(element) {
-                element.classList.remove('highlighted-red');
-            });
-            redHighlightedSquares.clear();
-            if(enPassantable!=null&&enPassantable[1]==0){
-                enPassantable=null;
-            }
-            promoPiece=null;
-            if (square.classList.contains('highlighted-yellow')) { //Highlight cancel
-                square.classList.remove('highlighted-yellow');
-                highlightedSquare = null;
-                possiList.clear();
-            } else {
-                if(possiList.has(square.dataset.row+square.dataset.col)){//Move
-                    let ret=movePiece(highlightedSquare,square);
-                    if (ret!=4){
-                        //console.log(moveNote);
-                        updateSideLog(moveNote);
-                        if(pgnBuilder.result!=""){
-                            pgnBuilder.display();
-                        }   
-                    }
-                    highlightedSquare.classList.remove('highlighted-yellow');
-                    square.classList.add('highlighted-yellow');
-                    highlightedSquare=square;
-                    possiList.clear();
-                    turn=!turn;
-                    if(enPassantable!=null){
-                        enPassantable[1]--;
-                    }
-                    
-
-                }else{//Different square highlight
-                    if (highlightedSquare !== null) {
-                        highlightedSquare.classList.remove('highlighted-yellow');
-                    }
-                    square.classList.add('highlighted-yellow');
-                    highlightedSquare = square;
-                    //highlightedPrint();
-                    let color=turn?"w":"b";
-                    if(highlightedSquare.dataset.piece[0]==color){
-                        pieceOnSquare(highlightedSquare);
-                        displayPossi();
-                        
-                    }else{
-                        possiList.clear(); 
-                    }
-                    
-                }
-                
-            }
-        }else{//Right click (down)
-            if (highlightedSquare !== null) {
-                highlightedSquare.classList.remove('highlighted-yellow');
-            }
-            if(possiList.size!==0){
-                possiList.clear();
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
-            highlightedSquare = square;
-            //highlightedPrint();
-
-        }
-    });
-    square.addEventListener('mouseup', function(event) {
-        if(event.button===0||highlightedSquare==null){
-            return;
-        }
-        if (highlightedSquare==square){
-            //Cancel highlight (red)
-            if (square.classList.contains('highlighted-red')) {
-                square.classList.remove('highlighted-red');
-                redHighlightedSquares.delete(square);
-            } else {
-                square.classList.add('highlighted-red');
-                redHighlightedSquares.add(square);
-            }
-        }else {
-            //Draw arrow
-            let startPos=getSquarePosition(highlightedSquare);
-            const endPos = getSquarePosition(square);
-            if(arrowSet.has(square2Chess(highlightedSquare)+square2Chess(square))){
-                arrowSet.delete(square2Chess(highlightedSquare)+square2Chess(square));
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                arrowSet.forEach(arrow => {
-                    drawArrow(getSquarePosition(arrow.highlightedSquare), getSquarePosition(arrow.square));
-                });
-                return;
-            }
-            arrowSet.set(square2Chess(highlightedSquare)+square2Chess(square),{highlightedSquare,square});
-            drawArrow(startPos, endPos);
-            highlightedSquare=square;
-            //highlightedPrint();
-            highlightedSquare=null;
-            startPos=null;
-        }
-    });
+    square.addEventListener('mousedown', squareMouseDownHandler);
+    square.addEventListener('mouseup', squareMouseUpHandler);
     
     return square;
 }

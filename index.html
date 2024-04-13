@@ -11,7 +11,12 @@
         <div class="board" id="board"style="float: left"></div>
          <div id="sideLog" class="side-log" style="float: left"></div>
     </div>
-    
+    <div class="container">
+        <input type="text" id="moveInput" class="textfield" autocomplete="off" placeholder="Enter your move...">
+        
+      </div>
+      <button id="resignButton" style="margin-left:30px">Resign</button>
+    <button id="drawButton">Offer Draw</button>
     <canvas id="canvas"></canvas>
     <div id="popupContainer" class="popup-container">
         <div class="popup-content">
@@ -47,6 +52,7 @@
             <button id="closeOverlayButton">X</button>
         </div> 
     </div>
+
 
     <script type="module" src="script.js"></script>
 </body>
