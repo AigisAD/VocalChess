@@ -1,9 +1,8 @@
 # VocalChess
 Fully working chess program with intent to allow user input via speech. A passion project for my love of chess and with hopes of using it to learn how to play blindfolded. Heavily inspired by chess.com UI.
 
-DEMO: 
+**_PLAY HERE!_** : https://aigisad.github.io/VocalChess/
 
-[![VocalChess](https://img.youtube.com/vi/cAxslJ05Iow/0.jpg)](https://www.youtube.com/watch?v=cAxslJ05Iow)
 
 **_VERSION 1.0_**
   * Fully created board and pieces
@@ -29,3 +28,9 @@ DEMO:
   * Resignation/Draw offers
   * Three-fold Repetition
   * Board flipping
+
+
+
+DEMO: 
+
+[![VocalChess](https://img.youtube.com/vi/cAxslJ05Iow/0.jpg)](https://www.youtube.com/watch?v=cAxslJ05Iow)
