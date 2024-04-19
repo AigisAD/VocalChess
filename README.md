@@ -1,8 +1,11 @@
 # VocalChess
 Fully working chess program with intent to allow user input via speech. A passion project for my love of chess and with hopes of using it to learn how to play blindfolded. Heavily inspired by chess.com UI.
 
-**_VERSION 0.8_**
-**Current Progress:**
+DEMO: 
+
+[![VocalChess](https://img.youtube.com/vi/cAxslJ05Iow/0.jpg)](https://www.youtube.com/watch?v=cAxslJ05Iow)
+
+**_VERSION 1.0_**
   * Fully created board and pieces
   * Ability to draw arrows and square highlights on the board
   * Piece logic for every single piece under pins, checks, etc.
@@ -11,7 +14,9 @@ Fully working chess program with intent to allow user input via speech. A passio
   * Ability to choose promotion piece
   * Move history in Algebraic Chess Notation
   * Ability to download functioning PGN at end of game
-  * Ability to make moves with Algebraic Chess Notation input
+  * Ability to make moves with Algebraic Chess Notation text input
+  * Ability to make moves with speech input
+  * Responsive sound effects
     
 **All Chess Rules** (for fellow chess nerds):
   * Castling
@@ -22,3 +27,5 @@ Fully working chess program with intent to allow user input via speech. A passio
   * Pin
   * Check/Checkmate/Stalemate
   * Resignation/Draw offers
+  * Three-fold Repetition
+  * Board flipping
