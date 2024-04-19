@@ -2,7 +2,7 @@ export default class pgnClass{
     constructor(){
         this.result="";
         this.game="";
-        this.pgn= `[Event "Jacques Chess"]
+        this.pgn= `[Event "Vocal Chess"]
         [Site "JacquesFish"]
         [Date "??"]
         [Round "?"]
@@ -36,9 +36,9 @@ export default class pgnClass{
         const downloadLink = document.createElement('a');
         downloadLink.download = 'game.pgn'; 
         downloadLink.href = url;
+        downloadLink.style.marginLeft="30px";
         downloadLink.innerText = 'Download PGN';
-        document.body.appendChild(document.createElement('br'));
-        document.body.appendChild(document.createElement('br'));
+
         document.body.appendChild(downloadLink);
     }
 

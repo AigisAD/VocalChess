@@ -22,6 +22,7 @@
     align-items: center;
     justify-content: center;
     
+    
 }
 
 #canvas {
@@ -41,6 +42,8 @@
     aspect-ratio: 1 / 1;
     background-size: contain;
     background-repeat: no-repeat;
+    
+    
 }
 .dark {
     background-color: #769656;
@@ -136,6 +139,7 @@
    align-items: flex-start;
    padding-left: 30px; 
    padding-bottom: 40px;
+   padding-top: 40px;
 
    
 }
@@ -143,7 +147,6 @@
 .square:nth-child(8n+1)::before {
     content: attr(data-chess-c);
     position: absolute;
-    transform: translateY(+100%);
     left: -20px;
   }
   
@@ -152,10 +155,34 @@
     content: attr(data-chess);
     position: absolute;
     bottom: -20px; /* Adjust position as needed */
-    transform: translateX(-50%);
+
   }
 
+.flip-board .square:nth-child(8n+1)::before {
+    content: "";
+}
 
+/* Add letters to top edge when board is flipped */
+.flip-board .square:nth-child(n+57)::after {
+    content: "";
+}
+
+/* Add letters to top edge when board is flipped */
+.flip-board .square:nth-child(8n+8)::before {
+  content:attr(data-chess-C);
+  position: absolute;
+  transform:  rotate(180deg);
+  right: -20px;
+   /* Adjust position as needed */
+}
+/* Add letters to top edge when board is flipped */
+.flip-board .square:nth-child(-n+8)::after {
+  content: attr(data-chess);
+  position: absolute;
+  top: -20px;
+  transform:  rotate(180deg); /* Rotate content by 180 degrees */
+
+}
 .popup-container {
     display: none;
     position: fixed;
@@ -207,6 +234,7 @@
     border-radius: 5px;
     outline: none;
     transition: border-color 0.3s ease;
+    margin-right: 10px;
   }
   
   .textfield:focus {
@@ -216,8 +244,60 @@
   .container {
     margin-left: 30px;
     margin-bottom: 10px;
+    display: flex;
 
+  }
+  .container button {
+    margin-right: 5px; /* Adjust the space between buttons */
   }
   .invalid-input {
     border: 1px solid red !important;
+  }
+  .flip-board {
+    transform: rotate(180deg);
+  }
+#toggleButton {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 50px;
+    height: 25px;
+    background-color: #ccc;
+    border-radius: 25px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#toggleButton:before {
+    content: '';
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    background-color: white;
+    border-radius: 50%;
+    top: 0;
+    left: 0;
+    transition: left 0.3s;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+#toggleButton.toggled {
+    background-color: #4CAF50;
+
+}
+
+#toggleButton.toggled:before {
+    left: 25px;
+}
+.toggle-container {
+  position: relative;
+}
+
+.toggle-label {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 60px; 
+  font-size: 14px;
+  color: black;
 }
