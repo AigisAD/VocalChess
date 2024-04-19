@@ -363,7 +363,6 @@ function updateSideLog(moveNotation) {
     soundControl(moveNotation);//sounds
     let x=window.getComputedStyle(sideLog).getPropertyValue('max-height');
     let y=window.getComputedStyle(board).getPropertyValue('width');
-    console.log(x,y)
     sideLog.style.maxHeight=y;
 
 }
