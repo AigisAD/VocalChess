@@ -17,6 +17,12 @@ Fully working chess program with intent to allow user input via speech. A passio
   * Ability to make moves with speech input
   * Responsive sound effects
     
+**_VERSION 2.0_**
+  * Added chess AI that plays using Stockfish 16 Engine
+  * Ability for AI to use speechWebkit to speak out loud
+  * New toggle buttons (Z to toggle speech recognition, X to repeat AI speech
+  * New beginning overlay to pick if AI/human is playing white/black
+    
 **All Chess Rules** (for fellow chess nerds):
   * Castling
   * En Passant
