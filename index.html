@@ -7,7 +7,28 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    
+    <div id="background-overlay"></div>
+    <div id="game-mode-overlay">
+        <h2>Select Game Mode</h2>
+        <div class="player-selection">
+            <div class="player-option">
+                <label for="white-player">White:</label>
+                <select id="white-player">
+                    <option value="human">Human</option>
+                    <option value="ai">AI</option>
+                </select>
+            </div>
+            <div class="player-option">
+                <label for="black-player">Black:</label>
+                <select id="black-player">
+                    <option value="human">Human</option>
+                    <option value="ai">AI</option>
+                </select>
+            </div>
+        </div>
+        <button id="start-game">Start Game</button>
+    </div>
+
     <div class="board-container">
         <div class="board" id="board"style="float: left"></div>
          <div id="sideLog" class="side-log" style="float: left"></div>
@@ -72,5 +93,6 @@
 
     <script type="module" src="script.js"></script>
     <script src="vocal.js"></script>
+    <script type="module" src="chessai.js"></script>
 </body>
 </html>

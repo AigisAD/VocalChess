@@ -1,12 +1,20 @@
 let recognition = null;
+let keepon=false;
+let acted=false;
 let targetWords=["knight", "bishop", "king", "queen", "rook",
 "castle", "long", "short", "equal","takes", "promote", "check","checkmate",
 "a","b","c","d","e","f","g","h",
 "1","2","3","4","5","6","7","8"];
 
 const startRecognition = () => {
+    if (recognition) {
+        recognition.stop(); 
+        acted=false;
+        
+    }
     recognition = new webkitSpeechRecognition(); // Initialize SpeechRecognition object
     recognition.interimResults = true;
+  
     recognition.onstart = () => {
         console.log('Speech recognition started');
         recognition.grammars = new webkitSpeechGrammarList();
@@ -15,7 +23,6 @@ const startRecognition = () => {
     };
 
     recognition.onresult = (event) => {
-       
         const transcript = event.results[0][0].transcript;
         let check=[];
         const field=document.getElementById('moveInput');
@@ -23,6 +30,7 @@ const startRecognition = () => {
         field.value=transcript.toLowerCase();
         field.classList.remove('invalid-input');
         if(event.results[0].isFinal){
+            acted=true;
             console.log(transcript);
             check=field.value.split(" ");
             let correctedTranscripts = check.map(transcript => {
@@ -30,24 +38,32 @@ const startRecognition = () => {
                 return closestMatch ? closestMatch : transcript;
             });
             translate(correctedTranscripts);
-            field.value=correctedTranscripts.join("");
             var enterKey = new KeyboardEvent("keydown", {
                 key: "Enter",
                 keyCode: 13,
               });
+            field.value=correctedTranscripts.join("");
             field.dispatchEvent(enterKey);
         }
         
 
     };
-    recognition.addEventListener('end', function() {
-        if(document.getElementById('toggleButton').classList.contains('toggled')){
-            recognition.start();
-        }
-        
-    });
+  
     recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
+    
+        //console.error('Speech recognition error:', event.error); 
+        
+    };
+    recognition.onend = () => {
+        console.log('Speech recognition ended');
+        if(document.getElementById('toggleButton').classList.contains('toggled')&&keepon&&(recognition)){
+            try{recognition.start()} catch(error){};
+        }
+        else if(!acted&&document.getElementById('toggleButton').classList.contains('toggled')){
+            //console.log("didnt act");
+            startRecognition();  
+               
+        }
     };
 
     recognition.start(); // Start speech recognition
@@ -56,7 +72,7 @@ const startRecognition = () => {
 const stopRecognition = () => {
     if (recognition) {
         recognition.stop(); // Stop speech recognition
-        console.log("Stopped");
+        console.log("Stopped Manually");
     }
 };
 
@@ -73,7 +89,36 @@ const toggleRecognition = () => {
         button.classList.add('toggled');
     }
 };
+document.addEventListener('aiSpeaking', function(event) {//Ai speech wont get picked up
+    acted=true;
+    recognition.stop();
+    console.log("stopped for "+event.detail.time);
+    
+    setTimeout(() => {
+       if(document.getElementById('toggleButton').classList.contains('toggled')){
+        startRecognition();
+       }
+      
+    }, event.detail.time);
+  
 
+});
+document.addEventListener('resetRec', function(event) {//Reset speech
+    if(!keepon){
+        console.log("reset");
+        setTimeout(() => {
+            startRecognition(); // Restart recognition after a short delay
+        }, 200);  
+    }
+    
+
+});
+document.addEventListener('playerConfigSet', function(event) {
+    if(event.detail.white!="ai"&&event.detail.black!="ai"){
+        keepon=true;
+    }
+
+});
 function translate(transcript){
     const translations = {
         "takes": "x",
@@ -90,6 +135,7 @@ function translate(transcript){
         "check": "+",
         "checkmate": "#",
         "dee":"d",//I slur my words
+        "he":"e",
         "sea":"c",
         "at":"f",
         "bee":"b",
@@ -102,9 +148,20 @@ function translate(transcript){
         "seven": "7",
         "eight": "8",
         "gameplay": "",
+        "play":"",
         "lawn":"O-",
         "route": "R",
         "rip": "R",
+        "she":"c",
+        "alpha":"a",
+        "beta":"b",
+        "charlie":"c",
+        "delta":"d",
+        "epsilon":"e",
+        "foxtrot":"f",
+        "gamma":"g",
+        "hotel":"h"
+        
     };
     for (let i = 0; i < transcript.length; i++) {
         if (translations.hasOwnProperty(transcript[i])) {
@@ -145,3 +202,9 @@ function levenshteinDistance(s1, s2) {
     return dp[s1.length][s2.length];
 }
 document.getElementById('toggleButton').addEventListener('click', toggleRecognition);
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'z' || event.key === 'Z') { 
+        toggleRecognition();
+    }
+});
+

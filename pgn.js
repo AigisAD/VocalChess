@@ -1,7 +1,10 @@
-export default class pgnClass{
+class pgnClass extends EventTarget{
     constructor(){
+        super();
         this.result="";
         this.game="";
+        this.uci="";
+        this.last="";
         this.pgn= `[Event "Vocal Chess"]
         [Site "JacquesFish"]
         [Date "??"]
@@ -12,6 +15,11 @@ export default class pgnClass{
     }
     updateGame(move) {
         this.game+=move;
+        this.last=move;
+    }
+    updateUCI(move){
+        this.uci+=move+ " ";
+        this.dispatchEvent(new CustomEvent('gameUpdated', { detail: this.uci }));
     }
     updateRes(win){
         switch (win){
@@ -27,6 +35,7 @@ export default class pgnClass{
         }
     }
     display(){
+        //console.log(this.uci);
         this.pgn= this.pgn+
         `[Result "${this.result}"]
 
@@ -43,3 +52,5 @@ export default class pgnClass{
     }
 
 }
+let pgnBuilder=new pgnClass();
+export default pgnBuilder;

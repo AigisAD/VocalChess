@@ -1,4 +1,5 @@
-import pgnClass from './pgn.js';
+import pgnBuilder from './pgn.js';
+import game from './board.js';
 const board = document.getElementById('board');
 const canvas = document.getElementById('canvas');
 const moveInput = document.getElementById('moveInput');
@@ -10,34 +11,6 @@ canvas.height = window.innerHeight;
 board.width = canvas.width * .70; //Adjust to css
 const ctx = canvas.getContext('2d');
 
-//Board to keep track of squares and stuff
-class Board{
-    constructor (){
-        this.squareBoard = Array(8).fill(null).map(() => Array(8).fill(null));
-        this.highlightedSquare = null;
-        this.redHighlightedSquares = new Set();
-        this.arrowSet=new Map;
-        this.possiList=new Set();
-        this.kings=["74","04"]//White black
-        this.kingMoved=[false,false];
-        this.turn=true; //White=true;
-        this.promoPiece=null;
-        this.enPassantable=null;
-        this.moveNote="";
-        this.moveNumber=1;
-        this.gameOver=false;
-        this.flip=false;
-        this.boardPositions = {}; //for threefold
-        this.rookMoved=new Set();
-
-    }
-    print(){
-        for(let i=0;i<8;i++){
-            console.log(this.squareBoard[i]);
-        }
-        console.log("\n");
-    }
-}
 
 //Listeners for the textfield
 moveInput.addEventListener('keydown', function(event) {
@@ -70,7 +43,8 @@ function handleTextInput(){
     let prev=game.highlightedSquare;
     if(result==null||game.gameOver){
         moveInput.classList.add('invalid-input');
-        document.getElementById('parseSound').play()
+        document.getElementById('parseSound').play();
+        document.dispatchEvent(new Event('resetRec'));
         return;
     }
     let maybe=null;
@@ -113,6 +87,8 @@ function handleTextInput(){
     }else{
         moveInput.classList.add('invalid-input');
         document.getElementById('illegalSound').play()
+        document.dispatchEvent(new Event('resetRec'));
+
     }
     
 }
@@ -404,6 +380,8 @@ function squareMouseDownHandler(event)  {
             game.possiList.clear();
         } else {
             if(game.possiList.has(square.dataset.row+square.dataset.col)){//Move
+                let from= game.highlightedSquare.dataset.chess+game.highlightedSquare.dataset.chessC;
+                let to= square.dataset.chess+square.dataset.chessC;
                 let ret=movePiece(game.highlightedSquare,square);
                 game.highlightedSquare.classList.remove('highlighted-yellow');
                 square.classList.add('highlighted-yellow');
@@ -414,8 +392,9 @@ function squareMouseDownHandler(event)  {
                     game.enPassantable[1]--;
                 }
                 if (ret!=4){
-                    //console.log(moveNote);
+                    //console.log(from+to);
                     updateSideLog(game.moveNote);
+                    pgnBuilder.updateUCI(from+to);
                     if(pgnBuilder.result!=""){//game over
                         pgnBuilder.display();
                         endSidelog();
@@ -429,7 +408,7 @@ function squareMouseDownHandler(event)  {
                 }
                 square.classList.add('highlighted-yellow');
                 game.highlightedSquare = square;
-                highlightedPrint();
+                //highlightedPrint();
                 let color=game.turn?"w":"b";
                 if(game.highlightedSquare.dataset.piece[0]==color&&!game.gameOver){
                     pieceOnSquare(game.highlightedSquare);
@@ -1394,6 +1373,11 @@ function processPromo(promoPiece){
         game.turn=!game.turn;
 
         updateSideLog(game.moveNote);
+        let uciHelp=game.moveNote[0]+(game.turn?"2":"7")+game.highlightedSquare.dataset.chess+
+            game.highlightedSquare.dataset.chessC+game.highlightedSquare.dataset.piece[1].toLowerCase();
+        pgnBuilder.updateUCI(uciHelp);
+
+        //console.log(uciHelp);
         if(pgnBuilder.result!=""){ //game over
             pgnBuilder.display();
         }
@@ -1418,12 +1402,36 @@ document.querySelectorAll(".promotion-option").forEach(function(option) {
     });
 });
 
-let game=new Board();
-let pgnBuilder=new pgnClass();
-createBoard();
+document.getElementById('start-game').addEventListener('click', function() {
+    const whitePlayer = document.getElementById('white-player').value;
+    const blackPlayer = document.getElementById('black-player').value;
+
+    const event = new CustomEvent('playerConfigSet', {
+        detail: {
+            white: whitePlayer,
+            black: blackPlayer
+        }
+    });
+    document.dispatchEvent(event);
+    // Hide the overlay after selection
+    document.getElementById('background-overlay').style.display = 'none';
+    document.getElementById('game-mode-overlay').style.display = 'none';
+
+    // Now, based on the selection, you can initialize the game accordingly
+    startGame(whitePlayer, blackPlayer);
+});
+
+function startGame(whitePlayer, blackPlayer) {
+    console.log(`Starting game: White - ${whitePlayer}, Black - ${blackPlayer}`);
+    createBoard();
+}
+
+
+
+
+
 
 /** NEXT UP
- * AI?
  * proper draw?
  * update pin check?
  * could fix vocal promote?
